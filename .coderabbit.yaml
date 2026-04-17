@@ -1,12 +1,72 @@
+# CodeRabbit 設定ファイル
+# ドキュメント: https://docs.coderabbit.ai/
+
 language: "ja-JP"
 
+# レビューの口調・補足指示
+tone_instructions: |
+  レビューは日本語で行ってください。
+  バグの指摘は具体的なコード例を示して説明してください。
+  重大な問題（バグ・セキュリティ）は明確に「🚨 重大」と表記してください。
+  軽微な改善提案は「💡 提案」と表記してください。
+
 reviews:
+  # PRの概要コメントを自動生成
   high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai まとめ"
+
+  # 詩の生成は不要
   poem: false
+
+  # レビュー完了後にステータスコメントを投稿
   review_status: true
+
+  # コードウォークスルーを生成
+  collapse_walkthrough: false
+
   auto_review:
+    # PRオープン時に自動レビュー
     enabled: true
+    # ドラフトPRはレビューしない
     drafts: false
+    # ベースブランチ
+    base_branches:
+      - main
+
+  # パスごとのレビュー指示
+  path_instructions:
+    - path: "js/scoring.js"
+      instructions: |
+        スコア計算のロジックを重点的に確認してください。
+        - レベル倍率が正しく適用されているか
+        - localStorage の読み書きで型変換（parseInt）が行われているか
+        - ハイスコアの比較ロジックに問題がないか
+
+    - path: "js/piece.js"
+      instructions: |
+        回転行列の実装を確認してください。
+        時計回り90度の変換式: rotated[c][rows-1-r] = shape[r][c]
+        この式と異なる実装は回転方向のバグの可能性があります。
+
+    - path: "js/renderer.js"
+      instructions: |
+        ゴーストピースの描画位置を確認してください。
+        isValidPosition が false になった時点の ghostY が正しい落下先です。
+        ghostY + 1 を使っている場合はバグです。
+
+    - path: "js/game.js"
+      instructions: |
+        ウォールキックのオフセット値を確認してください。
+        標準的なオフセットは ±1 です。±2 以上の場合はピースが壁を貫通します。
+        ドロップスコアの加算値も確認してください（ハードドロップは2点/セル）。
+
+    - path: "js/board.js"
+      instructions: |
+        境界チェックのロジックを確認してください。
+        右端: newX >= BOARD_WIDTH
+        左端: newX < 0
+        下端: newY >= BOARD_HEIGHT
 
 chat:
+  # @coderabbitai への返信を自動処理
   auto_reply: true
