@@ -17,6 +17,10 @@ class Game {
     this.isPaused = false;
     this.dropTimer = null;
 
+    // DAS/ARR 用タイマー
+    this._dasTimer = null;
+    this._arrTimer = null;
+
     this._bindUI();
     this._bindKeys();
     this._updateStats();
@@ -32,8 +36,16 @@ class Game {
     document.addEventListener('keydown', (e) => {
       if (!this.isRunning || this.isPaused) return;
       switch (e.code) {
-        case 'ArrowLeft':  e.preventDefault(); this._moveLeft(); break;
-        case 'ArrowRight': e.preventDefault(); this._moveRight(); break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          this._moveLeft();
+          this._startDAS('left');
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          this._moveRight();
+          this._startDAS('right');
+          break;
         case 'ArrowDown':  e.preventDefault(); this._softDrop(); break;
         case 'ArrowUp':    e.preventDefault(); this._rotate(); break;
         case 'Space':      e.preventDefault(); this._hardDrop(); break;
@@ -41,6 +53,36 @@ class Game {
         case 'KeyP':       e.preventDefault(); this.togglePause(); break;
       }
     });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        this._clearDAS();
+      }
+    });
+  }
+
+  // DAS 開始: DAS_DELAY 後に ARR を開始する
+  _startDAS(direction) {
+    this._clearDAS();
+    this._dasTimer = setTimeout(() => {
+      this._arrTimer = setInterval(() => {
+        if (!this.isRunning || this.isPaused) {
+          this._clearDAS();
+          return;
+        }
+        if (direction === 'left') this._moveLeft();
+        else this._moveRight();
+      }, ARR_DELAY);
+    }, DAS_DELAY);
+  }
+
+  // BUG: _arrTimer (setInterval) がクリアされていない。
+  // キーを離してもARRが動き続け、ピースが意図せず移動し続ける。
+  _clearDAS() {
+    clearTimeout(this._dasTimer);
+    this._dasTimer = null;
+    // clearInterval(this._arrTimer) が抜けている
+    this._arrTimer = null;
   }
 
   start() {
