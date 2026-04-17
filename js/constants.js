@@ -22,3 +22,8 @@ const LINES_PER_LEVEL = 10;
 
 // ライン数ごとの基本スコア
 const SCORE_TABLE = [0, 100, 300, 500, 800];
+
+// ロックディレイ: 着地後にロックするまでの時間 (ms)
+const LOCK_DELAY = 500;
+// ロックディレイのリセット上限回数（テトリスガイドライン準拠）
+const MAX_LOCK_RESETS = 15;
