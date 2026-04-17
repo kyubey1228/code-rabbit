@@ -1,7 +1,9 @@
 class Scoring {
   constructor() {
     this.reset();
-    this.highScore = 0;
+    // BUG: parseInt が抜けているため localStorage の値が文字列のまま読み込まれる
+    // "1000" > "500" は文字列比較で false になり、ハイスコアが正しく更新されない
+    this.highScore = localStorage.getItem('tetris-high-score') || 0;
   }
 
   reset() {
@@ -19,6 +21,7 @@ class Scoring {
     this.level = Math.floor(this.lines / LINES_PER_LEVEL);
     if (this.score > this.highScore) {
       this.highScore = this.score;
+      localStorage.setItem('tetris-high-score', this.highScore);
     }
   }
 
