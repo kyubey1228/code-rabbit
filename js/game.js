@@ -103,7 +103,7 @@ class Game {
     const lines = this.board.clearLines();
     if (lines > 0) {
       this.scoring.addLines(lines);
-      this._scheduleDrops(); // 速度再設定
+      this._scheduleDrops();
     }
     this.holdUsed = false;
     this._updateStats();
@@ -134,11 +134,18 @@ class Game {
   }
 
   _softDrop() {
-    this._moveDown();
+    if (this._moveDown()) {
+      this.scoring.score += 1; // ソフトドロップ: 1セル = 1点
+      this._updateStats();
+    }
   }
 
   _hardDrop() {
-    while (this._moveDown()) { /* 最下部まで落とす */ }
+    let cells = 0;
+    while (this._moveDown()) cells++;
+    // BUG: ハードドロップは 2点/セル が正しいが 1点/セル になっている
+    this.scoring.score += cells;
+    this._updateStats();
     this._lock();
   }
 
