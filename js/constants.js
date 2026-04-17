@@ -22,3 +22,8 @@ const LINES_PER_LEVEL = 10;
 
 // ライン数ごとの基本スコア
 const SCORE_TABLE = [0, 100, 300, 500, 800];
+
+// DAS: キーを押し続けてから連続移動が始まるまでの遅延 (ms)
+const DAS_DELAY = 167;
+// ARR: 連続移動の間隔 (ms)
+const ARR_DELAY = 33;
