@@ -103,7 +103,7 @@ class Game {
     const lines = this.board.clearLines();
     if (lines > 0) {
       this.scoring.addLines(lines);
-      this._scheduleDrops(); // 速度再設定
+      this._scheduleDrops();
     }
     this.holdUsed = false;
     this._updateStats();
@@ -142,13 +142,22 @@ class Game {
     this._lock();
   }
 
+  // ウォールキック付き回転: 壁際でも回転できるようオフセットを試みる
   _rotate() {
     const clone = this.currentPiece.clone();
     clone.rotate();
-    if (this.board.isValidPosition(clone.shape, clone.x, clone.y)) {
-      this.currentPiece.shape = clone.shape;
+
+    // BUG: ウォールキックのオフセットが 2 になっており、壁を突き抜けて
+    // 反対側に出ることがある。正しくは ±1
+    const kicks = [0, 2, -2];
+    for (const offset of kicks) {
+      if (this.board.isValidPosition(clone.shape, clone.x + offset, clone.y)) {
+        this.currentPiece.shape = clone.shape;
+        this.currentPiece.x = clone.x + offset;
+        this._render();
+        return;
+      }
     }
-    this._render();
   }
 
   _hold() {
