@@ -8,9 +8,24 @@ class Piece {
     this.y = 0;
   }
 
+  // 7種類のピースが必ず1回ずつ出現する7bagランダマイザー
   static random() {
-    const type = PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
-    return new Piece(type);
+    if (!Piece._bag || Piece._bagIndex >= Piece._bag.length) {
+      Piece._bag = Piece._shuffle([...PIECE_TYPES]);
+      Piece._bagIndex = 0;
+    }
+    return new Piece(Piece._bag[Piece._bagIndex++]);
+  }
+
+  // Fisher-Yates シャッフル
+  static _shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      // BUG: (i + 1) とすべきところを i にしているため、
+      // arr[0] は常に i=1 のときしか交換対象にならず出現確率が偏る
+      const j = Math.floor(Math.random() * i);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
   // 時計回りに90度回転
@@ -34,3 +49,6 @@ class Piece {
     return p;
   }
 }
+
+Piece._bag = null;
+Piece._bagIndex = 0;
