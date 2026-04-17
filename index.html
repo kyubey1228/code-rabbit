@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="game-container">
+      <canvas id="board" width="300" height="600"></canvas>
+    </div>
+    <div id="side-panel">
+      <div class="panel-section">
+        <h3>NEXT</h3>
+        <canvas id="next-canvas" width="120" height="120"></canvas>
+      </div>
+      <div class="panel-section">
+        <h3>HOLD</h3>
+        <canvas id="hold-canvas" width="120" height="120"></canvas>
+      </div>
+      <div class="panel-section">
+        <div class="stat-label">SCORE</div>
+        <div id="score">0</div>
+        <div class="stat-label">HIGH SCORE</div>
+        <div id="high-score">0</div>
+        <div class="stat-label">LEVEL</div>
+        <div id="level">1</div>
+        <div class="stat-label">LINES</div>
+        <div id="lines">0</div>
+      </div>
+      <div class="panel-section">
+        <button id="start-btn">START</button>
+        <button id="pause-btn" disabled>PAUSE</button>
+      </div>
+      <div id="game-over-screen" class="hidden">
+        <h2>GAME OVER</h2>
+        <button id="restart-btn">RESTART</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/constants.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/piece.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
