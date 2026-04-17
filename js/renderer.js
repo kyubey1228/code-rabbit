@@ -9,7 +9,6 @@ class Renderer {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
     ctx.fillRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-    // ハイライト
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.fillRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, 4);
     ctx.globalAlpha = 1;
@@ -17,7 +16,6 @@ class Renderer {
 
   _drawBoard(board) {
     this.boardCtx.clearRect(0, 0, BOARD_WIDTH * CELL_SIZE, BOARD_HEIGHT * CELL_SIZE);
-    // グリッド線
     this.boardCtx.strokeStyle = '#1e1e2e';
     this.boardCtx.lineWidth = 0.5;
     for (let r = 0; r < BOARD_HEIGHT; r++) {
@@ -35,6 +33,23 @@ class Renderer {
       for (let c = 0; c < piece.shape[r].length; c++) {
         if (piece.shape[r][c]) {
           this._drawCell(this.boardCtx, piece.x + c, piece.y + r, piece.color);
+        }
+      }
+    }
+  }
+
+  // ゴーストピース（落下先）を半透明で描画
+  _drawGhost(piece, board) {
+    let ghostY = piece.y;
+    while (board.isValidPosition(piece.shape, piece.x, ghostY + 1)) {
+      ghostY++;
+    }
+    // BUG: ghostY + 1 を使っているため、衝突する無効な位置に描画される
+    // 正しくは ghostY（最後に有効だった位置）
+    for (let r = 0; r < piece.shape.length; r++) {
+      for (let c = 0; c < piece.shape[r].length; c++) {
+        if (piece.shape[r][c]) {
+          this._drawCell(this.boardCtx, piece.x + c, ghostY + 1 + r, piece.color, 0.2);
         }
       }
     }
@@ -58,6 +73,7 @@ class Renderer {
   render(board, currentPiece, nextPiece, holdPiece, holdUsed) {
     this._drawBoard(board);
     if (currentPiece) {
+      this._drawGhost(currentPiece, board);
       this._drawPiece(currentPiece);
     }
     this._drawMiniPiece(this.nextCtx, nextPiece);
