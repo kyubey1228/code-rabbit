@@ -17,6 +17,10 @@ class Game {
     this.isPaused = false;
     this.dropTimer = null;
 
+    // ロックディレイ用
+    this._lockTimer = null;
+    this._lockResets = 0;
+
     this._bindUI();
     this._bindKeys();
     this._updateStats();
@@ -64,6 +68,7 @@ class Game {
     this.isPaused = !this.isPaused;
     if (this.isPaused) {
       this._stopDrops();
+      this._cancelLockDelay();
       document.getElementById('pause-btn').textContent = 'RESUME';
     } else {
       this._scheduleDrops();
@@ -85,8 +90,31 @@ class Game {
 
   _tick() {
     if (!this._moveDown()) {
-      this._lock();
+      this._startLockDelay();
     }
+  }
+
+  _startLockDelay() {
+    if (this._lockTimer) return; // すでにカウント中
+    this._lockTimer = setTimeout(() => {
+      this._lockTimer = null;
+      this._lockResets = 0;
+      this._lock();
+    }, LOCK_DELAY);
+  }
+
+  _cancelLockDelay() {
+    clearTimeout(this._lockTimer);
+    this._lockTimer = null;
+  }
+
+  // 移動・回転時にロックディレイをリセットする（上限あり）
+  _tryResetLock() {
+    if (!this._lockTimer) return;
+    if (this._lockResets >= MAX_LOCK_RESETS) return;
+    this._lockResets++;
+    this._cancelLockDelay();
+    this._startLockDelay();
   }
 
   _spawn() {
@@ -99,6 +127,8 @@ class Game {
   }
 
   _lock() {
+    this._cancelLockDelay();
+    this._lockResets = 0;
     this.board.placePiece(this.currentPiece);
     const lines = this.board.clearLines();
     if (lines > 0) {
@@ -113,6 +143,7 @@ class Game {
   _moveLeft() {
     if (this.board.isValidPosition(this.currentPiece.shape, this.currentPiece.x - 1, this.currentPiece.y)) {
       this.currentPiece.x--;
+      this._tryResetLock();
       this._render();
     }
   }
@@ -120,6 +151,7 @@ class Game {
   _moveRight() {
     if (this.board.isValidPosition(this.currentPiece.shape, this.currentPiece.x + 1, this.currentPiece.y)) {
       this.currentPiece.x++;
+      this._tryResetLock();
       this._render();
     }
   }
@@ -161,6 +193,7 @@ class Game {
       if (this.board.isValidPosition(clone.shape, clone.x + offset, clone.y)) {
         this.currentPiece.shape = clone.shape;
         this.currentPiece.x = clone.x + offset;
+        this._tryResetLock();
         this._render();
         return;
       }
@@ -169,6 +202,8 @@ class Game {
 
   _hold() {
     if (this.holdUsed) return;
+    this._cancelLockDelay();
+    this._lockResets = 0;
     if (this.holdPiece) {
       const tmp = this.holdPiece;
       this.holdPiece = new Piece(this.currentPiece.type);
