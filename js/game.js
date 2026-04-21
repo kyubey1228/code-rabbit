@@ -68,6 +68,7 @@ class Game {
     this.isPaused = !this.isPaused;
     if (this.isPaused) {
       this._stopDrops();
+      this._cancelLockDelay();
       document.getElementById('pause-btn').textContent = 'RESUME';
     } else {
       this._scheduleDrops();
@@ -110,9 +111,7 @@ class Game {
   // 移動・回転時にロックディレイをリセットする（上限あり）
   _tryResetLock() {
     if (!this._lockTimer) return;
-    // BUG: > を使っているため MAX_LOCK_RESETS + 1 回まで許容してしまう
-    // 正しくは >= MAX_LOCK_RESETS でリセットを拒否すべき
-    if (this._lockResets > MAX_LOCK_RESETS) return;
+    if (this._lockResets >= MAX_LOCK_RESETS) return;
     this._lockResets++;
     this._cancelLockDelay();
     this._startLockDelay();
@@ -194,6 +193,7 @@ class Game {
       if (this.board.isValidPosition(clone.shape, clone.x + offset, clone.y)) {
         this.currentPiece.shape = clone.shape;
         this.currentPiece.x = clone.x + offset;
+        this._tryResetLock();
         this._render();
         return;
       }
@@ -202,6 +202,8 @@ class Game {
 
   _hold() {
     if (this.holdUsed) return;
+    this._cancelLockDelay();
+    this._lockResets = 0;
     if (this.holdPiece) {
       const tmp = this.holdPiece;
       this.holdPiece = new Piece(this.currentPiece.type);
