@@ -29,9 +29,12 @@ reviews:
     enabled: true
     # ドラフトPRはレビューしない
     drafts: false
-    # ベースブランチ
+    # ベースブランチ（main + すべてのfeature/fix系ブランチ）
     base_branches:
       - main
+      - "feat/.*"
+      - "fix/.*"
+      - "feature/.*"
 
   # パスごとのレビュー指示
   path_instructions:
